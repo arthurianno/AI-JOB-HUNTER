@@ -205,16 +205,19 @@ class HabrCareerJobSourcePlugin(private val client: OkHttpClient) : JobSourcePlu
                         }
                         
                         if (cleanTitle.isNotBlank()) {
+                            val fallbackId = currentLink.substringAfterLast("/", "").substringBefore("?")
+                            val stableGuid = currentGuid.ifBlank { fallbackId }.ifBlank { System.currentTimeMillis().toString() }
+                            
                             vacancies.add(
                                 RawVacancy(
-                                    id = "habr-${currentGuid.ifBlank { System.currentTimeMillis().toString() }}",
+                                    id = "habr-$stableGuid",
                                     title = cleanTitle,
                                     companyName = currentCompany.ifBlank { "Не указана" },
                                     salaryFrom = null,
                                     salaryTo = null,
                                     salaryCurrency = "RUR",
                                     description = currentDescription,
-                                    url = currentLink.ifBlank { "https://career.habr.com/vacancies/$currentGuid" },
+                                    url = currentLink.ifBlank { "https://career.habr.com/vacancies/$stableGuid" },
                                     source = "Habr Career",
                                     createdAt = System.currentTimeMillis()
                                 )

@@ -39,6 +39,9 @@ interface VacancyDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertVacancies(vacancies: List<VacancyEntity>): List<Long>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM vacancies WHERE LOWER(TRIM(companyName)) = LOWER(TRIM(:companyName)) AND LOWER(TRIM(title)) = LOWER(TRIM(:title)) LIMIT 1)")
+    suspend fun existsByCompanyAndTitle(companyName: String, title: String): Boolean
+
     @Query("UPDATE vacancies SET status = 'PENDING_ANALYSIS' WHERE status = 'ARCHIVED' OR status = 'MATCHED'")
     suspend fun resetAnalyzedVacancies()
 

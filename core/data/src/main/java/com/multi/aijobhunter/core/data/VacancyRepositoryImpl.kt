@@ -76,7 +76,21 @@ class VacancyRepositoryImpl @Inject constructor(
         try {
             val profile = userPreferences.readProfile() ?: return@withContext emptyList()
             val raw = pluginManager.executeAllPlugins(profile.targetPosition)
-            val entities = raw.map { it.toEntity() }
+            
+            // 1. Дедуплицируем полученный список внутри себя по компании и названию
+            val uniqueRaw = raw.distinctBy { 
+                it.companyName.lowercase().trim() to it.title.lowercase().trim() 
+            }
+            
+            // 2. Исключаем вакансии, которые уже существуют в базе данных (даже если ID другой)
+            val entities = uniqueRaw.mapNotNull { rawVacancy ->
+                val exists = vacancyDao.existsByCompanyAndTitle(
+                    companyName = rawVacancy.companyName,
+                    title = rawVacancy.title
+                )
+                if (!exists) rawVacancy.toEntity() else null
+            }
+            
             vacancyDao.insertVacancies(entities)
 
             val baseUrl = userPreferences.getBaseUrl()
