@@ -108,13 +108,17 @@ class VacancyRepositoryImpl @Inject constructor(
                     )
                 }
                 
+                val finalStatus = if (aiResult.matchScore >= 60) VacancyStatus.MATCHED else VacancyStatus.REJECTED
+                
                 val updated = entity.copy(
-                    status = VacancyStatus.MATCHED.name,
+                    status = finalStatus.name,
                     matchScore = aiResult.matchScore,
                     aiAnalysisJson = Json.encodeToString(aiResult)
                 )
                 vacancyDao.updateVacancy(updated)
-                matchedList.add(updated.toDomainModel())
+                if (finalStatus == VacancyStatus.MATCHED) {
+                    matchedList.add(updated.toDomainModel())
+                }
             }
 
             val status = "SUCCESS"

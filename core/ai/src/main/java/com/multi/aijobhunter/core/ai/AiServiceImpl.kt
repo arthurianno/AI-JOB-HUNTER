@@ -180,15 +180,37 @@ class AiServiceImpl @Inject constructor(
             }
         }
 
+        val vacancyTitleLower = vacancy.title.lowercase()
+        val targetLower = profile.targetPosition.lowercase()
+
+        // Проверяем явное несоответствие роли/платформы
+        val isPlatformMismatch = (targetLower.contains("android") && (
+            vacancyTitleLower.contains("ios") || 
+            vacancyTitleLower.contains("swift") || 
+            vacancyTitleLower.contains("objective-c") || 
+            vacancyTitleLower.contains("flutter") || 
+            vacancyTitleLower.contains("react native") || 
+            vacancyTitleLower.contains("react-native") ||
+            vacancyTitleLower.contains("backend") ||
+            vacancyTitleLower.contains("devops") ||
+            vacancyTitleLower.contains("designer") ||
+            vacancyTitleLower.contains("qa") ||
+            vacancyTitleLower.contains("тестировщик")
+        ))
+
         // Базовая эвристика скоринга
         val matchPercent = when {
-            vacancy.title.lowercase().contains("ios") || vacancy.title.lowercase().contains("flutter") -> {
+            isPlatformMismatch -> {
+                cons.add("Несоответствие целевой платформы/роли")
+                10
+            }
+            vacancyTitleLower.contains("ios") || vacancyTitleLower.contains("flutter") -> {
                 cons.add("Вакансия под другую мобильную платформу")
                 10 // Не совпадает стек по платформе
             }
             else -> {
                 val base = 40 + (matchedCount * 12).coerceAtMost(45)
-                if (jobDescLower.contains("senior") && vacancy.title.lowercase().contains("senior")) {
+                if (jobDescLower.contains("senior") && vacancyTitleLower.contains("senior")) {
                     pros.add("Уровень Senior соответствует вашему профилю")
                 }
                 if (jobDescLower.contains("remote") || jobDescLower.contains("удален")) {
