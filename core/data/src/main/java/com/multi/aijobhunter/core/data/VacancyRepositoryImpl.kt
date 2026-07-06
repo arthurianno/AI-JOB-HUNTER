@@ -49,10 +49,20 @@ class VacancyRepositoryImpl @Inject constructor(
         scoutLogDao.clearLogs()
     }
 
-    override fun getMatchedVacanciesPaged(): Flow<PagingData<Vacancy>> {
+    override fun getMatchedVacanciesPaged(
+        filterRemote: Boolean,
+        filterMatch85: Boolean,
+        filterHighSalary: Boolean
+    ): Flow<PagingData<Vacancy>> {
         return Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-            pagingSourceFactory = { vacancyDao.getMatchedVacanciesPagingSource() }
+            pagingSourceFactory = { 
+                vacancyDao.getMatchedVacanciesPagingSource(
+                    filterRemote = filterRemote,
+                    filterMatch85 = filterMatch85,
+                    filterHighSalary = filterHighSalary
+                ) 
+            }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomainModel() }
         }.flowOn(dispatchers.io)

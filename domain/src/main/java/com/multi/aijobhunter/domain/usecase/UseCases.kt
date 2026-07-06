@@ -33,7 +33,15 @@ class UpdateVacancyStatusUseCase @Inject constructor(
 class GetMatchedVacanciesUseCase @Inject constructor(
     private val repository: VacancyRepository
 ) {
-    operator fun invoke(): Flow<PagingData<Vacancy>> = repository.getMatchedVacanciesPaged()
+    operator fun invoke(
+        filterRemote: Boolean,
+        filterMatch85: Boolean,
+        filterHighSalary: Boolean
+    ): Flow<PagingData<Vacancy>> = repository.getMatchedVacanciesPaged(
+        filterRemote = filterRemote,
+        filterMatch85 = filterMatch85,
+        filterHighSalary = filterHighSalary
+    )
 }
 
 class FetchNewVacanciesUseCase @Inject constructor(

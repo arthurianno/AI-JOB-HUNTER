@@ -21,18 +21,17 @@ class FeedViewModel @Inject constructor(
 
     private val _filtersFlow = MutableStateFlow(Triple(false, false, false))
 
-    val vacanciesFlow: Flow<PagingData<Vacancy>> = getMatchedVacanciesUseCase()
-        .cachedIn(viewModelScope)
-        .combine(_filtersFlow) { pagingData, filters ->
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val vacanciesFlow: Flow<PagingData<Vacancy>> = _filtersFlow
+        .flatMapLatest { filters ->
             val (remote, match85, highSalary) = filters
-            pagingData.filter { vacancy ->
-                val descLower = vacancy.description.lowercase()
-                val isRemoteMatch = !remote || descLower.contains("remote") || descLower.contains("удален") || descLower.contains("distribute")
-                val isScoreMatch = !match85 || (vacancy.aiAnalysis?.matchScore ?: 0) >= 85
-                val isSalaryMatch = !highSalary || (vacancy.salary?.from ?: 0.0) >= 2500.0 || (vacancy.salary?.from ?: 0.0) >= 200000.0
-                isRemoteMatch && isScoreMatch && isSalaryMatch
-            }
-        }.cachedIn(viewModelScope)
+            getMatchedVacanciesUseCase(
+                filterRemote = remote,
+                filterMatch85 = match85,
+                filterHighSalary = highSalary
+            )
+        }
+        .cachedIn(viewModelScope)
 
     init {
         // Первичное наполнение базы из плагинов

@@ -233,7 +233,10 @@ fun VacancyFeedScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(vacancies.itemCount) { index ->
+                        items(
+                            count = vacancies.itemCount,
+                            key = { index -> vacancies.peek(index)?.id ?: index }
+                        ) { index ->
                             val vacancy = vacancies[index]
                             if (vacancy != null) {
                                 VacancyCard(
@@ -307,8 +310,8 @@ fun VacancyCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val sdf = java.text.SimpleDateFormat("dd.MM", java.util.Locale.getDefault())
-                    val dateStr = sdf.format(java.util.Date(vacancy.createdAt))
+                    val sdf = remember { java.text.SimpleDateFormat("dd.MM", java.util.Locale.getDefault()) }
+                    val dateStr = remember(vacancy.createdAt) { sdf.format(java.util.Date(vacancy.createdAt)) }
                     val isHot = (vacancy.aiAnalysis?.matchScore ?: 0) >= 80
                     
                     Text(

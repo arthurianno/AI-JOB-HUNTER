@@ -11,7 +11,11 @@ interface VacancyRepository {
     fun getScoutLogsFlow(): Flow<List<ScoutLog>>
     suspend fun addScoutLog(log: ScoutLog)
     suspend fun clearScoutLogs()
-    fun getMatchedVacanciesPaged(): Flow<PagingData<Vacancy>>
+    fun getMatchedVacanciesPaged(
+        filterRemote: Boolean,
+        filterMatch85: Boolean,
+        filterHighSalary: Boolean
+    ): Flow<PagingData<Vacancy>>
     fun getVacancyById(id: String): Flow<Vacancy?>
     suspend fun fetchAndAnalyzeNewVacancies(): List<Vacancy>
     suspend fun generateCoverLetter(vacancyId: String, style: String): String

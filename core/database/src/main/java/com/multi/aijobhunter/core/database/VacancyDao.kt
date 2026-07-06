@@ -10,8 +10,19 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface VacancyDao {
-    @Query("SELECT * FROM vacancies WHERE status = 'MATCHED' ORDER BY createdAt DESC")
-    fun getMatchedVacanciesPagingSource(): PagingSource<Int, VacancyEntity>
+    @Query("""
+        SELECT * FROM vacancies 
+        WHERE status = 'MATCHED' 
+          AND (:filterRemote = 0 OR (description LIKE '%remote%' OR description LIKE '%удален%' OR description LIKE '%distribute%'))
+          AND (:filterMatch85 = 0 OR matchScore >= 85)
+          AND (:filterHighSalary = 0 OR (salaryFrom >= 2500.0 OR salaryFrom >= 200000.0))
+        ORDER BY createdAt DESC
+    """)
+    fun getMatchedVacanciesPagingSource(
+        filterRemote: Boolean,
+        filterMatch85: Boolean,
+        filterHighSalary: Boolean
+    ): PagingSource<Int, VacancyEntity>
 
     @Query("SELECT * FROM vacancies WHERE id = :id")
     fun getVacancyByIdFlow(id: String): Flow<VacancyEntity?>
