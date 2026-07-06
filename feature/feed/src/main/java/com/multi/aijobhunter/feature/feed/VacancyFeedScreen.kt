@@ -188,7 +188,7 @@ fun VacancyFeedScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                if (vacancies.loadState.refresh is LoadState.Loading) {
+                if (vacancies.loadState.refresh is LoadState.Loading && vacancies.itemCount == 0) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),

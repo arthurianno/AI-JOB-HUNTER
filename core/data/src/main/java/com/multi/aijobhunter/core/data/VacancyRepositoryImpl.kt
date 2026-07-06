@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.multi.aijobhunter.core.common.CoroutineDispatchers
 import com.multi.aijobhunter.core.database.VacancyDao
+import com.multi.aijobhunter.core.database.VacancyEntity
 import com.multi.aijobhunter.core.model.*
 import com.multi.aijobhunter.core.ai.AiService
 import com.multi.aijobhunter.core.network.JobPluginManager
@@ -103,6 +104,7 @@ class VacancyRepositoryImpl @Inject constructor(
             val limit = if (isFreeOrLocal) 5 else pending.size
             val toAnalyze = pending.take(limit)
             val matchedList = mutableListOf<Vacancy>()
+            val updatedEntities = mutableListOf<VacancyEntity>()
             
             toAnalyze.forEachIndexed { index, entity ->
                 if (isFreeOrLocal && index > 0) {
@@ -129,10 +131,14 @@ class VacancyRepositoryImpl @Inject constructor(
                     matchScore = aiResult.matchScore,
                     aiAnalysisJson = Json.encodeToString(aiResult)
                 )
-                vacancyDao.updateVacancy(updated)
+                updatedEntities.add(updated)
                 if (finalStatus == VacancyStatus.MATCHED) {
                     matchedList.add(updated.toDomainModel())
                 }
+            }
+
+            if (updatedEntities.isNotEmpty()) {
+                vacancyDao.updateVacancies(updatedEntities)
             }
 
             val status = "SUCCESS"

@@ -48,6 +48,9 @@ interface VacancyDao {
     @Update
     suspend fun updateVacancy(vacancy: VacancyEntity)
 
+    @Update
+    suspend fun updateVacancies(vacancies: List<VacancyEntity>)
+
     @Query("UPDATE vacancies SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: String, status: String)
 
